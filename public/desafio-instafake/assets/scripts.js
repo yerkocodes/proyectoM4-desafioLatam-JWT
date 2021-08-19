@@ -1,6 +1,7 @@
-// captura de formulario
+// Form capture
 const form = document.getElementById('js-form');
 
+// Event Listener to form submit
 form.addEventListener('submit', async (e) => {
 	e.preventDefault();
 	const email = document.getElementById('js-input-email').value;
@@ -55,7 +56,7 @@ const addPosts = (posts) => {
 	let titlePage = `
 		<div class="container d-flex">
 			<h1>Feed</h1>
-			<h4 class="ml-auto"><a href="...">Cerrar</a></h4>
+			<h4 class="ml-auto"><a id="logoutSesion" href="">Cerrar</a></h4>
 		</div>
 	`;
 
@@ -76,3 +77,9 @@ const addPosts = (posts) => {
 	// Esconder formulario
 	form.setAttribute('style','display:none;')
 }
+
+// Logout session
+document.getElementById('logoutSesion').addEventListener('click', () => {
+	localStorage.clear(); // Limpia el localStorage
+	location.reload(); // Recarga la pagina al cerrar sesion
+})
