@@ -13,7 +13,7 @@ form.addEventListener('submit', async (e) => {
 	} else {
 		alert('El JWT no es valido')
 	}
-	//console.log(posts)
+	console.log(posts)
 })
 
 const postData = async (email, password) => {
@@ -54,9 +54,9 @@ const addPosts = (posts) => {
 
 	let template ='';
 	let titlePage = `
-		<div class="container d-flex">
-			<h1>Feed</h1>
-			<h4 class="ml-auto"><a id="logoutSesion" href="">Cerrar</a></h4>
+		<div class="container d-flex justify-content-between align-items-center">
+			<h2>Feed</h2>
+			<h5 class=""><a id="logoutSesion" href="">Cerrar</a></h5>
 		</div>
 	`;
 
@@ -64,7 +64,7 @@ const addPosts = (posts) => {
 
 	posts.forEach((element, index) => {
 		template += `
-			<div class="card w-100 my-5">
+			<div class="card w-50 my-5 mx-auto">
 				<img src="${element.download_url}" class="card-img-top" alt="...">
 				<div class="card-body">
 					<p class="card-text">${element.author}</p>
@@ -79,7 +79,9 @@ const addPosts = (posts) => {
 }
 
 // Logout session
-document.getElementById('logoutSesion').addEventListener('click', () => {
+const logout = document.getElementById('logoutSesion')
+
+logout.addEventListener('click', () => {
 	localStorage.clear(); // Limpia el localStorage
 	location.reload(); // Recarga la pagina al cerrar sesion
 })
