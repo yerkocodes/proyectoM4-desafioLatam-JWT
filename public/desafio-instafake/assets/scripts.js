@@ -1,3 +1,4 @@
+//Test Reinaldo
 // Form capture
 const form = document.getElementById('js-form');
 let posts = [];
