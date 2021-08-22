@@ -1,28 +1,27 @@
 // Form capture
 const form = document.getElementById('js-form');
+let posts = [];
+const btnShowMore = document.getElementById('btnShowMore');
 
 // Event Listener to form submit
 form.addEventListener('submit', async (e) => {
 	e.preventDefault();
 
-	//let imagesPage = 1;
-
 	const email = document.getElementById('js-input-email').value;
 	const pass = document.getElementById('js-input-password').value;
 
-	const JWT = await postData(email, pass);
-	const posts = await getPosts(JWT)
+	const JWT = await login(email, pass);
+	posts = await getPosts(JWT)
 
-	if(posts){
-		addPosts(posts)
-	} else {
-		alert('El JWT no es valido')
-	}
-	//console.log(posts)
+		if(posts.length !== 0){
+			addPosts(posts)
+			btnShowMore.setAttribute('style','display:block;')
+		}
+
+	console.log(posts)
 })
-
 // Funcion que Verifica y obtiene el TOKEN
-const postData = async (email, password) => {
+const login = async (email, password) => {
 	try {
 		const response = await fetch(`http://localhost:3000/api/login`, {
 			method:'POST',
@@ -49,15 +48,40 @@ const getPosts = async (jwt) => {
 			}
 		})
 		const { data } = await res.json(); // $$$ ? {}
+		//console.log(data)
 		return data;
 	} catch(err) {
 		console.error(`Error ${err}`)
 	}
 };
 
+const getMorePosts = async (jwt, page) => {
+	try {
+		const res = await fetch(`http://localhost:3000/api/photos?page=${page}`, {
+			method:'GET',
+			headers: {
+				Authorization: `Bearer ${jwt}`
+			},
+			//params: { $$$
+			//	page: page
+			//}
+		})
+		const { data } = await res.json(); // $$$ ? {}
+		//console.log(data)
+		//if(data){
+		//	addPosts(data)
+		//}
+		return data;
+	} catch(err) {
+		console.error(`Error ${err}`)
+	}
+};
+
+
 // Funcion que manipula y anade los posts en el DOM
-const addPosts = (posts) => {
 	const instaFotos = document.getElementById('instaFotos')
+
+const addPosts = (posts) => {
 
 	let template ='';
 	let titlePage = `
@@ -69,10 +93,10 @@ const addPosts = (posts) => {
 
 	instaFotos.innerHTML = titlePage;
 
-	posts.forEach((element, index) => {
+	posts.forEach((element) => {
 		template += `
 			<div class="card w-50 my-5 mx-auto">
-				<img src="${element.download_url}" class="card-img-top" style="width:20px;" alt="...">
+				<img src="${element.download_url}" class="card-img-top" alt="...">
 				<div class="card-body">
 					<p class="card-text">${element.author}</p>
 				</div>
@@ -81,44 +105,39 @@ const addPosts = (posts) => {
 	})
 	instaFotos.innerHTML += template;
 
-	let showMoreBtn = `
-		<div id="showPhotos">
-			<button onclick="showMorePhotos" class="btn btn-primary text-center" >Mostrar mas</button>
-		</div>
-	`;
-	instaFotos.innerHTML += showMoreBtn
-
 	// Esconder formulario
 	form.setAttribute('style','display:none;')
 }
 
 // Show more photos Btn
 
-// Evento click para agregar más conjuntos de fotos, añadiéndolas
-//const agregarFotos = async () =>{
-//	pagina = pagina + 1;
-//
-//	const token = localStorage.getItem('jwt-token');
-//	const photos = await getPosts(token,pagina);
-//	addPosts(photos);
-//
-//	return pagina;
-//};
+let contador = 2;
 
-const showMorePhotos = () => {
-
+ const showMorePhotos = async () => {
 	const JWT = localStorage.getItem("jwt-token")
-	imagesPage++;
-	console.log("loadImg ", imagesPage);
-	if (imagesPage <= 10) {
-		getPosts(JWT, imagesPage);
-	} else {
-		alert("No hay mas fotos para cargar")
-	}
+	const data = await getMorePosts(JWT, contador);
+
+	let template= ''
+	data.forEach((element) => {
+		template += `
+			<div class="card w-50 my-5 mx-auto">
+				<img src="${element.download_url}" class="card-img-top" alt="...">
+				<div class="card-body">
+					<p class="card-text">${element.author}</p>
+				</div>
+			</div>
+		`
+	})
+	instaFotos.innerHTML += template;
+
+	contador++
+	//console.log(posts)
 }
 
 // Logout session
 const logout = () => {
-	localStorage.clear(); // Limpia el localStorage
+	localStorage.removeItem("jwt-token"); // Limpia el localStorage, en especifico la llave pasada como argumento al localStorage
+	//localStorage.clear(); // Limpia el todo el localStorage
 	location.reload(); // Recarga la pagina al cerrar sesion
 }
+
