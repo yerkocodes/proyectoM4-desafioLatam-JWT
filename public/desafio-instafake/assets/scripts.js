@@ -1,3 +1,4 @@
+//test for colaboration
 // Form capture
 const form = document.getElementById('js-form');
 let posts = [];
