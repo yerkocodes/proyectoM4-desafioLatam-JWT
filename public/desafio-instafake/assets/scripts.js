@@ -1,4 +1,3 @@
-//test for colaboration
 // Form capture
 const form = document.getElementById('js-form');
 let posts = [];
@@ -18,9 +17,8 @@ form.addEventListener('submit', async (e) => {
 			addPosts(posts)
 			btnShowMore.setAttribute('style','display:block;')
 		}
-
-	console.log(posts)
 })
+
 // Funcion que Verifica y obtiene el TOKEN
 const login = async (email, password) => {
 	try {
@@ -130,7 +128,6 @@ let contador = 2;
 		`
 	})
 	instaFotos.innerHTML += template;
-
 	contador++
 	//console.log(posts)
 }
@@ -142,3 +139,14 @@ const logout = () => {
 	location.reload(); // Recarga la pagina al cerrar sesion
 }
 
+// IIFE validate if exists token in localStorge, to hide login and load photos
+( async () => {
+	if ( localStorage.getItem('jwt-token') ) {
+		form.setAttribute('style','display:none;');
+		posts = await getPosts(localStorage.getItem('jwt-token'))
+		if(posts.length !== 0){
+			addPosts(posts)
+			btnShowMore.setAttribute('style','display:block;')
+		}
+	}
+})()
