@@ -3,19 +3,32 @@ const API = 'http://localhost:3000/api';
 const APITOTAL = 'http://localhost:3000/api/total';
 
 window.onload = async () => {
-   try {
-        const response = await fetch(`${APITOTAL}`)
-        const {data} = await response.json()
-        mostrarGrafico(data)
-        mostrarTabla(data);
-    }catch(err){
-        console.error(`Error: ${err}`)
-    }
+  try {
+    const response = await fetch(`${APITOTAL}`)
+    const {data} = await response.json()
+    mostrarGrafico(data)
+    mostrarTabla(data);
+  }catch(err){
+    console.error(`Error: ${err}`)
+  }
 }
 
 // HTML CAPTURE 
 const navbarLogin = document.getElementById('login');
 const modalForm = document.getElementById('js-form');
+const situacionChileBtn = document.getElementById('situacionChile');
+const cerrarSesion = document.getElementById('cerrarSesion');
+const tablaContainer = document.getElementById('dataTable');
+
+situacionChileBtn.addEventListener('click', async () => {
+  try {
+    const jwt = await localStorage.getItem('jwt-token');
+    graficoChile(jwt);
+    dataTable.setAttribute('style','display:none;')
+  } catch (err) {
+    console.error(`Error: ${err}`);
+  }
+} )
 
 // BTN 'INICIAR SESION'
 navbarLogin.addEventListener('click', (e) => {
@@ -34,8 +47,20 @@ modalForm.addEventListener('submit', async (e) => {
   const jwt = await getTokenUser(email, pass);
 
   const dataUser = await getData(jwt);
-
+  // Cambian style de botones para ocultar y mostrar correspondientes en el navbar
+  situacionChileBtn.setAttribute('style','display:block')
+  cerrarSesion.setAttribute('style','display:block')
+  login.setAttribute('style','display:none')
 });
+
+situacionChile.addEventListener('click', () => {
+  console.log('very good');
+
+})
+
+cerrarSesion.addEventListener('click', () => {
+  console.log('Cerrar Sesion');
+})
 
 // VERIFY USER AND GET TOKEN
 const getTokenUser = async (email, password) => {
@@ -85,7 +110,113 @@ const getData = async (jwt) => {
   }
 };
 
-// CHART
+// CHART SITUACION CHILE
+
+const getDataSituacion = async (situacion, jwt) => {
+  try{
+    const response = await fetch(`${API}/${situacion}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      }
+    });
+    const { data } = await response.json();
+    //console.log(data);
+    return data;
+  } catch(err) {
+    console.error(err);
+  }
+};
+
+// APIS PARA GRAFICO CHILE
+
+let graficoChile = async (jwt) => {
+  
+  const confir = await getDataSituacion('confirmed', jwt)
+  const muert = await getDataSituacion('deaths', jwt)
+  const recupe = await getDataSituacion('recovered', jwt)
+
+  console.log(confir);
+  console.log(muert);
+  console.log(recupe);
+
+  let recuperados= [];
+  let muertos = [];
+  let confirmados = [];
+
+  confir.forEach((element)=>{
+    confirmados.push({ y: element.total, label: element.date });
+  })
+
+  muert.forEach((element)=>{
+    muertos.push({ y: element.total, label: element.date});
+  })
+  //console.log(confirmados);
+
+  recupe.forEach((element)=>{
+    recuperados.push({ y: element.total, label: element.date});
+  })
+  //console.log(recuperados);
+
+  var chart = new CanvasJS.Chart("chartContainer", {
+    animationEnabled: true,
+    title:{
+      text: "Situacion Chile"
+    },
+    axisX: {
+      valueFormatString: "DD MMM,YY",
+      labelAngle: 50,
+      //interval: 1,
+    },
+    axisY: {
+      title: "Cantidad de casos",
+    },
+    legend:{
+      cursor: "pointer",
+      fontSize: 16,
+      itemclick: toggleDataSeries
+    },
+    toolTip:{
+      shared: true
+    },
+    data: [{
+      name: "Confirmados",
+      type: "spline",
+      yValueFormatString: "#0.## °C",
+      showInLegend: true,
+      dataPoints: confirmados
+    },
+      {
+        name: "Muertos",
+        type: "spline",
+        yValueFormatString: "#0.## °C",
+        showInLegend: true,
+        dataPoints: muertos
+      },
+      {
+        name: "Recuperados",
+        type: "spline",
+        yValueFormatString: "#0.## °C",
+        showInLegend: true,
+        dataPoints: recuperados
+      }]
+  });
+  chart.render();
+
+  function toggleDataSeries(e){
+    if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+      e.dataSeries.visible = false;
+    }
+    else{
+      e.dataSeries.visible = true;
+    }
+    chart.render();
+  }
+
+}
+// -----------------------------------------------
+
+// CHART SITUACION MUNDIAL
 const mostrarGrafico = (data) => {
 
   let activos = [];
@@ -261,14 +392,20 @@ const idGrafico = document.getElementById('grafico');
 
 const countryDetails = async (param) => {
   try{
-//    param.split(' ').join('_');
-//    console.log(param);
-//    console.log(`Funcionando ${param}`)
+    //    param.split(' ').join('_');
+    //    console.log(param);
+    //    console.log(`Funcionando ${param}`)
     let data = await getDataCountry(`${param}`)
-//    console.log(data);
+    //    console.log(data);
     mostrarGraficoDetalle(data);
   } catch (err) {
     console.error(err);
   }
 }
 
+// Logout session
+const logout = () => {
+    localStorage.removeItem("jwt-token"); // Limpia el localStorage, en especifico la llave pasada como argumento al localStorage
+    //localStorage.clear(); // Limpia el todo el localStorage
+    location.reload(); // Recarga la pagina al cerrar sesion
+}

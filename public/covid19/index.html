@@ -26,8 +26,15 @@
                      <a class="nav-link" href="#">Home</a>
                   </li>
                   <li class="nav-item active">
+                     <a id="situacionChile" class="nav-link" style="display:none;" href="#">Situacion Chile</a>
+                  </li>
+                  <li class="nav-item active">
                      <a id="login" class="nav-link" data-toggle="modal" data-target="#exampleModal" href="#">Iniciar Sesion</a>
                   </li>
+                  <li class="nav-item active">
+                     <a id="cerrarSesion" class="nav-link" onclick="logout()" style="display:none;" href="#">Cerrar Sesion</a>
+                  </li>
+
                </ul>
             </div>
          </div>
@@ -39,7 +46,7 @@
       </div>
 
       <!-- TABLE -->
-      <div class="container my-5">
+      <div id="dataTable" class="container my-5">
 
          <table class="table">
             <thead id="thead" class="thead-dark">
